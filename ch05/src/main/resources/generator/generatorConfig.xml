@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <!-- MyBatis3Simple 简单，MyBatis3 带有 Example -->
+    <context id="MySqlContext" targetRuntime="MyBatis3" defaultModelType="flat">
+        <property name="beginningDelimiter" value="`"/>
+        <property name="endingDelimiter" value="`"/>
+        <property name="javaFileEncoding" value="UTF-8"/>
+
+        <commentGenerator>
+            <property name="suppressDate" value="true"/>
+            <property name="addRemarkComments" value="true"/>
+        </commentGenerator>
+
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/mybatis?serverTimezone=UTC"
+                        userId="root"
+                        password="123456">
+        </jdbcConnection>
+
+        <javaModelGenerator targetPackage="com.wj5633.ch05.model" targetProject="src\main\java">
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <sqlMapGenerator targetPackage="mappers" targetProject="src\main\resources">
+        </sqlMapGenerator>
+
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.wj5633.ch05.mapper" targetProject="src\main\java"/>
+
+        <table tableName="sys_user">
+            <generatedKey column="id" sqlStatement="MySql"/>
+        </table>
+        <table tableName="sys_role">
+            <generatedKey column="id" sqlStatement="MySql"/>
+        </table>
+        <table tableName="sys_user_role">
+            <generatedKey column="id" sqlStatement="MySql"/>
+        </table>
+        <table tableName="sys_privilege">
+            <generatedKey column="id" sqlStatement="MySql"/>
+        </table>
+        <table tableName="sys_role_privilege">
+            <generatedKey column="id" sqlStatement="MySql"/>
+        </table>
+    </context>
+</generatorConfiguration>
