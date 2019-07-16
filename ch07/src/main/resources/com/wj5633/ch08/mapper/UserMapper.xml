@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wj5633.ch07.mapper.UserMapper">
+    <!--开启二级缓存-->
+    <cache type="org.mybatis.caches.redis.RedisCache"
+           eviction="FIFO" flushInterval="60000" size="512" readOnly="true"/>
+    <!--开启关联业务二级缓存-->
+    <cache-ref namespace="com.wj5633.ch07.mapper.RoleMapper"/>
+
+    <resultMap id="userMap" type="com.wj5633.ch07.model.SysUser">
+        <id property="id" column="id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userPassword" column="user_password"/>
+        <result property="userEmail" column="user_email"/>
+        <result property="userInfo" column="user_info"/>
+        <result property="headImg" column="head_img"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <resultMap id="userRoleListMap" extends="userMap" type="com.wj5633.ch07.model.SysUser">
+        <collection property="roleList" columnPrefix="role_" fetchType="lazy"
+                    resultMap="com.wj5633.ch07.mapper.RoleMapper.rolePrivilegeListMap"/>
+        <!--        <collection property="roleList" columnPrefix="role_" ofType="com.wj5633.ch07.model.SysRole">
+                    <id property="id" column="id"/>
+                    <result property="roleName" column="role_name"/>
+                    <result property="enabled" column="enabled"/>
+                    <result property="createBy" column="create_by"/>
+                    <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+                </collection>-->
+    </resultMap>
+
+    <resultMap id="userRoleListMapSelect" extends="userMap" type="com.wj5633.ch07.model.SysUser">
+        <collection property="roleList"
+                    fetchType="lazy"
+                    column="{userId=id}"
+                    select="com.wj5633.ch07.mapper.RoleMapper.selectRoleByUserId"/>
+
+    </resultMap>
+
+    <select id="selectAll" resultType="com.wj5633.ch07.model.SysUser">
+        select id,
+               user_name     as userName,
+               user_password as userPassword,
+               user_email    as userEmail,
+               user_info     as userInfo,
+               head_img      as headImg,
+               create_time   as createTime
+        from sys_user;
+    </select>
+
+    <select id="selectById" resultMap="userMap">
+        select id,
+               user_name     as userName,
+               user_password as userPassword,
+               user_email    as userEmail,
+               user_info     as userInfo,
+               head_img      as headImg,
+               create_time   as createTime
+        from sys_user
+        where id = #{id}
+    </select>
+
+    <delete id="deleteById">
+        delete
+        from sys_user
+        where id = #{id}
+    </delete>
+
+    <select id="selectUserAndRolesById" resultMap="userRoleListMap">
+        select u.id,
+               u.user_name,
+               u.user_password,
+               u.user_email,
+               u.user_info,
+               u.head_img,
+               u.create_time,
+               r.id             as role_id,
+               r.role_name      as role_role_name,
+               r.enabled        as role_enabled,
+               r.create_by      as role_create_by,
+               r.create_time    as role_create_time,
+               p.id             as role_privilege_id,
+               p.privilege_name as role_privilege_privilege_name,
+               p.privilege_url  as role_privilege_privilege_url,
+               p.create_time    as role_privilege_create_time
+        from sys_user u
+                 inner join sys_user_role ur on u.id = ur.user_id
+                 inner join sys_role r on ur.role_id = r.id
+                 inner join sys_role_privilege rp on rp.role_id = r.id
+                 inner join sys_privilege p on p.id = rp.privilege_id
+        where u.id = #{id}
+    </select>
+
+
+    <select id="selectUserAndRoleById" resultType="com.wj5633.ch07.model.SysUser">
+        select u.id,
+               u.user_name     as userName,
+               u.user_password as userPassword,
+               u.user_email    as userEmail,
+               u.user_info     as userInfo,
+               u.head_img      as headImg,
+               u.create_time   as createTime,
+               r.id            as "role.id",
+               r.role_name     as "role.roleName",
+               r.enabled       as "role.enabled",
+               r.create_by     as "role.createBy",
+               r.create_time   as "role.createTime"
+        from sys_user u
+                 inner join sys_user_role ur on u.id = ur.user_id
+                 inner join sys_role r on ur.role_id = r.id
+        where u.id = #{id}
+    </select>
+
+
+    <select id="selectUserAndRoleByIdSelect" resultMap="userRoleListMapSelect">
+        select u.id,
+               u.user_name,
+               u.user_password,
+               u.user_email,
+               u.user_info,
+               u.head_img,
+               u.create_time
+        from sys_user u
+        where u.id = #{id}
+    </select>
+</mapper>
